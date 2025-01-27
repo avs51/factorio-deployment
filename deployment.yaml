@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: factorio-server
+  labels:
+    app: factorio-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: factorio-server
+  template:
+    metadata:
+      labels:
+        app: factorio-server
+    spec:
+      securityContext:
+        fsGroup: 845
+        runAsUser: 845
+      containers:
+        - name: factorio-server
+          image: factoriotools/factorio:stable-2.0.9
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi" 
+              cpu: "1000m"
+          envFrom:
+            - configMapRef:
+                name: factorio-server-envs
+          volumeMounts:
+            - name: config
+              mountPath: /factorio/server-settings.json
+              subPath: server-settings.json
+              readOnly: true
+            - name: config
+              mountPath: /factorio/map-gen-settings.json
+              subPath: map-gen-settings.json
+              readOnly: true
+            - name: config
+              mountPath: /factorio/map-settings.json
+              subPath: map-settings.json
+              readOnly: true
+            - name: config
+              mountPath: /factorio/server-whitelist.json
+              subPath: server-whitelist.json
+              readOnly: true
+            - name: config
+              mountPath: /factorio/server-banlist.json
+              subPath: server-banlist.json
+              readOnly: true
+            - name: config
+              mountPath: /factorio/server-adminlist.json
+              subPath: server-adminlist.json
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: factorio-server-files
+            defaultMode: 0666
